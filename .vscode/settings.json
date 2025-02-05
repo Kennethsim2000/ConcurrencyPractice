@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    ".fantomasignore": "ignore",
+    "semaphore": "cpp",
+    "mutex": "cpp",
+    "queue": "cpp",
+    "ostream": "cpp",
+    "thread": "cpp"
+  }
+}
