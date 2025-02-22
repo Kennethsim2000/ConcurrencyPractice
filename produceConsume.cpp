@@ -77,3 +77,5 @@ int main()
 // tasks.json is used to define how your code is compiled and executed inside VS Code. Used to set compiler flags, standard versions (e.g., C++20), and output binaries.
 
 // Experiment with producer and consumer concurrency
+
+// g++ -fsanitize=thread -g -O1 -pthread -o produceConsume produceConsume.cpp
