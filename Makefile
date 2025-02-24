@@ -21,7 +21,22 @@ readWrite: readWrite.cpp
 
 concurrentHashmap: concurrentHashmap.cpp
 	$(CXX) $(CXXFLAGS) -o concurrentHashmap concurrentHashmap.cpp
-	
+
 # Clean the build artifacts
 clean:
 	rm -f $(TARGETS)
+
+# Test target
+check: all
+	# Add your test commands here, for example:
+	./orderBook
+	./produceConsume
+	./readWrite
+	./concurrentHashmap
+
+# Distribution check (commonly used in autotools projects)
+distcheck: check
+	@echo "Distribution check passed"
+
+# Phony targets
+.PHONY: all clean check distcheck
