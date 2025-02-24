@@ -12,15 +12,19 @@ all: $(TARGETS)
 # Define how to build each program
 orderBook: orderBook.cpp
 	$(CXX) $(CXXFLAGS) -o orderBook orderBook.cpp
+	chmod +x orderBook
 
 produceConsume: produceConsume.cpp
 	$(CXX) $(CXXFLAGS) -o produceConsume produceConsume.cpp
+	chmod +x produceConsume
 
 readWrite: readWrite.cpp
 	$(CXX) $(CXXFLAGS) -o readWrite readWrite.cpp
+	chmod +x readWrite
 
 concurrentHashmap: concurrentHashmap.cpp
 	$(CXX) $(CXXFLAGS) -o concurrentHashmap concurrentHashmap.cpp
+	chmod +x concurrentHashmap
 
 # Clean the build artifacts
 clean:
