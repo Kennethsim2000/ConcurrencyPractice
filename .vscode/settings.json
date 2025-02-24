@@ -5,6 +5,8 @@
     "mutex": "cpp",
     "queue": "cpp",
     "ostream": "cpp",
-    "thread": "cpp"
+    "thread": "cpp",
+    "iostream": "cpp",
+    "vector": "cpp"
   }
 }

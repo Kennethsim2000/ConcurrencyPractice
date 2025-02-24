@@ -19,9 +19,9 @@ produceConsume: produceConsume.cpp
 readWrite: readWrite.cpp
 	$(CXX) $(CXXFLAGS) -o readWrite readWrite.cpp
 
-concurrentHashMap: concurrentHashMap.cpp
-	$(CXX) $(CXXFLAGS) -o concurrentHashMap concurrentHashMap.cpp
-
+concurrentHashmap: concurrentHashmap.cpp
+	$(CXX) $(CXXFLAGS) -o concurrentHashmap concurrentHashmap.cpp
+	
 # Clean the build artifacts
 clean:
 	rm -f $(TARGETS)
