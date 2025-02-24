@@ -3,8 +3,8 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++20 -g -pthread
 
 # Source files and their corresponding targets
-SRC = orderBook.cpp produceConsume.cpp readWrite.cpp concurrentHashMap.cpp
-TARGETS = orderBook produceConsume readWrite concurrentHashMap
+SRC = orderBook.cpp produceConsume.cpp readWrite.cpp concurrentHashmap.cpp
+TARGETS = orderBook produceConsume readWrite concurrentHashmap
 
 # Default target: Build all programs
 all: $(TARGETS)
