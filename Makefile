@@ -1,12 +1,15 @@
 # Compiler
-CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++20 -g -pthread
+CXX = clang++
+CXXFLAGS = -Wall -Wextra -std=c++17 -g -pthread 
+#-wall and -Wextra is used to enable warning messages
+#-g is to include debug information
+#-pthread is used to enable multi-threading support
 
 # Source files and their corresponding targets
-SRC = orderBook.cpp produceConsume.cpp readWrite.cpp concurrentHashmap.cpp
-TARGETS = orderBook produceConsume readWrite concurrentHashmap
+SRC = orderBook.cpp produceConsume.cpp readWrite.cpp concurrentHashmap.cpp 
+TARGETS = orderBook produceConsume readWrite concurrentHashmap #Corresponding executable
 
-# Default target: Build all programs
+# Default rule when you run make: Build all programs
 all: $(TARGETS)
 
 # Define how to build each program
@@ -26,11 +29,11 @@ concurrentHashmap: concurrentHashmap.cpp
 	$(CXX) $(CXXFLAGS) -o concurrentHashmap concurrentHashmap.cpp
 	chmod +x concurrentHashmap
 
-# Clean the build artifacts
+# make clean: Deletes all the compiled binaries
 clean:
 	rm -f $(TARGETS)
 
-# Test target
+# make check: Builds everything, then run the executables
 check: all
 	# Add your test commands here, for example:
 	./orderBook
@@ -38,9 +41,9 @@ check: all
 	./readWrite
 	./concurrentHashmap
 
-# Distribution check (commonly used in autotools projects)
+# make distcheck: Distribution check, runs check, then echo
 distcheck: check
 	@echo "Distribution check passed"
 
-# Phony targets
+# Declares that all, clean, check and distcheck are not files
 .PHONY: all clean check distcheck
