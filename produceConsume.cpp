@@ -1,81 +1,88 @@
 #include <chrono>
 #include <iostream>
-#include <semaphore>
 #include <thread>
 #include <mutex>
 #include <queue>
-using namespace std;
+#include <condition_variable>
 
-mutex mtx;
-counting_semaphore<10> sem{0};
-queue<int> q;
-vector<thread> lst;
-atomic<bool> finished = false; // Use atomic to avoid reordering issues
+std::mutex mtx;
+std::mutex cout_mtx; // Separate mutex for cout
+std::condition_variable cv;
+std::queue<int> q;
+std::vector<std::thread> lst;
+std::atomic<bool> finished = false;
 
 void produce()
 {
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10; i++)
     {
         {
-            unique_lock<mutex> lock(mtx); // acquire the mutex
+            std::unique_lock<std::mutex> lock(mtx);
             q.push(i);
-            cout << "Producer is producing " << i << endl;
-        } // destroys mutex after pushing
+        }
+        {
+            std::unique_lock<std::mutex> cout_lock(cout_mtx);
+            std::cout << "Producer is producing " << i << std::endl;
+        }
+        cv.notify_one(); // Wake up one waiting consumer
+        
         if (i % 10 == 0)
         {
-            this_thread::sleep_for(chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-        sem.release();
     }
-    finished = true; // set finished without locking mutex, (atomic prevents data race)
+    finished = true;
+    cv.notify_all(); // Wake up all waiting consumers to let them exit
 }
 
 void consume()
 {
     while (true)
     {
+        std::unique_lock<std::mutex> lock(mtx);
+        
+        // Wait until there's work or we're finished
+        cv.wait(lock, [] { return !q.empty() || finished; });
+        
+        // Check if we should exit
+        if (finished && q.empty())
         {
-            unique_lock<mutex> lock(mtx); // acquire a lock here when accessing finished, a shared variable
-            if (finished && q.empty())
+            lock.unlock(); // Release main lock before cout
+            std::unique_lock<std::mutex> cout_lock(cout_mtx);
+            std::cout << "finished consumption by thread " << std::this_thread::get_id() << std::endl;
+            break;
+        }
+        
+        // If there's work to do
+        if (!q.empty())
+        {
+            int num = q.front();
+            q.pop();
+            lock.unlock(); // Release lock while doing work
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            
+            // Protect cout with separate mutex
             {
-                cout << "finished consumption" << endl;
-                break;
+                std::unique_lock<std::mutex> cout_lock(cout_mtx);
+                std::cout << "consuming " << num << " by thread " << std::this_thread::get_id() << std::endl;
             }
         }
-
-        sem.acquire();
-        unique_lock<mutex> lock(mtx); // make sure to acquire sem first because if we acquire mutex and wait for sem, it may lead to deadlock
-        int num = q.front();
-        q.pop();
-        this_thread::sleep_for(chrono::milliseconds(5)); // simulate some work
-        cout << "consuming " << num << " by thread " << this_thread::get_id() << endl;
     }
 }
 
 int main()
 {
-    thread t1(produce);
+    std::thread t1(produce);
     for (int i = 0; i < 10; i++)
     {
-        thread t(consume);
-        lst.push_back(move(t));
-        // std::thread::thread cannot be referenced, it is a deleted function if i just push_back t
+        std::thread t(consume);
+        lst.push_back(std::move(t));
     }
     t1.join();
-    for (thread &t : lst) // threads cannot be copied
-    {                     // ✅ Use a reference to avoid copying
+    for (std::thread &t : lst)
+    {
         t.join();
     }
     return 0;
 }
-
-// mutex to ensure mutual exclusion when accessing a buffer,
-//  semaphore(int consumers) to track the number of events avaiable
-// we can use a std::queue as the buffer
-
-// c_cpp_properties.json is used to configures IntelliSense, include paths, and the compiler VS Code should use.
-// tasks.json is used to define how your code is compiled and executed inside VS Code. Used to set compiler flags, standard versions (e.g., C++20), and output binaries.
-
-// Experiment with producer and consumer concurrency
-
-// g++ -fsanitize=thread -g -O1 -pthread -o produceConsume produceConsume.cpp

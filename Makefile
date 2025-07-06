@@ -1,8 +1,7 @@
 # Compiler
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -std=c++20 -g -pthread 
+CXXFLAGS = -Wall -Wextra -std=c++20 -pthread 
 #-wall and -Wextra is used to enable warning messages
-#-g is to include debug information
 #-pthread is used to enable multi-threading support
 
 # Source files and their corresponding targets
