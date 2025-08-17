@@ -19,16 +19,17 @@ public:
     {
         capacity_ = capacity;
         len_ = 0;
-        // data_ = ::operator new(sizeof(T) * capacity);  this does not call constructor of T yet, it just gives u a raw memory block.
-        data_ = new T[capacity];
+        data_ = ::operator new(sizeof(T) * capacity); //  this does not call constructor of T yet, it just gives u a raw memory block.
+        // data_ = new T[capacity];
         // This implementation constructs capacity objects right away
     }
 
     ~vector()
     {
-        delete[] data_;
+        // delete[] data_;
         // The delete operator deallocates memory and calls the destructor for a single object created with new.
         //  The delete [] operator deallocates memory and calls destructors for an array of objects created with new []
+        ::operator delete(data_);
     }
 
     // TODO: Implement this resize method to reserve capacity amount of memory, and copy over the
@@ -36,8 +37,18 @@ public:
     {
     }
 
+    // TODO: Complete indexing
+    T &operator[](size_t index)
+    { // operator[] is an array index operator, used to access elements within a collection
+    }
+
     // TODO: Complete push_back method
     void push_back(T elem)
+    {
+    }
+
+    // TODO: print vector
+    void print_vector()
     {
     }
 
@@ -52,4 +63,8 @@ public:
     }
 };
 
+int main()
+{
+    return 0;
+}
 // size(), capacity(), operator[] (unchecked), push_back, pop_back.
