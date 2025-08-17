@@ -19,12 +19,26 @@ public:
     {
         capacity_ = capacity;
         len_ = 0;
+        // data_ = ::operator new(sizeof(T) * capacity);  this does not call constructor of T yet, it just gives u a raw memory block.
         data_ = new T[capacity];
+        // This implementation constructs capacity objects right away
     }
 
     ~vector()
     {
         delete[] data_;
+        // The delete operator deallocates memory and calls the destructor for a single object created with new.
+        //  The delete [] operator deallocates memory and calls destructors for an array of objects created with new []
+    }
+
+    // TODO: Implement this resize method to reserve capacity amount of memory, and copy over the
+    void resize(size_t capacity)
+    {
+    }
+
+    // TODO: Complete push_back method
+    void push_back(T elem)
+    {
     }
 
     size_t size()
