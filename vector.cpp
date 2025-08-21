@@ -38,7 +38,6 @@ public:
         ::operator delete(data_); // frees raw memory previously allocated by ::operator new, does not call destructor
     }
 
-    // TODO: Implement this resize method to reserve capacity amount of memory, and copy over the elements of the previous
     void resize(size_t capacity)
     {
         void *raw = ::operator new(sizeof(T) * capacity);
@@ -53,9 +52,16 @@ public:
         capacity_ = capacity;
     }
 
-    // TODO: Complete indexing
-    T &operator[](size_t index)
-    { // operator[] is an array index operator, used to access elements within a collection
+    const T &operator[](size_t index) // including a const T& means the function returns a reference to a const T, you can read the element but cannot modify if through the function
+    {                                 // operator[] is an array index operator, used to access elements within a collection
+        if (index >= len_)
+        {
+            throw std::out_of_range("Index is larger than size of vector");
+        }
+        else
+        {
+            return data_[index];
+        }
     }
 
     // TODO: Complete push_back method
