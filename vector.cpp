@@ -29,12 +29,28 @@ public:
         // delete[] data_;
         // The delete operator deallocates memory and calls the destructor for a single object created with new.
         //  The delete [] operator deallocates memory and calls destructors for an array of objects created with new []
-        ::operator delete(data_);
+
+        for (size_t i = 0; i < len_; i++) // calls the destructor of each of the elements in the vector
+        {
+            data_[i].~T();
+        }
+
+        ::operator delete(data_); // frees raw memory previously allocated by ::operator new, does not call destructor
     }
 
-    // TODO: Implement this resize method to reserve capacity amount of memory, and copy over the
+    // TODO: Implement this resize method to reserve capacity amount of memory, and copy over the elements of the previous
     void resize(size_t capacity)
     {
+        void *raw = ::operator new(sizeof(T) * capacity);
+        T *new_data = static_cast<T *>(raw);
+        for (size_t i = 0; i < len_; i++)
+        {
+            new (new_data + i) T std::move(data_[i]); // because we are working with raw memory, you need to construct objects explicitly with in new_allocated
+            data_[i].~T();
+        }
+        ::operator delete(data_);
+        data_ = new_data;
+        capacity_ = capacity;
     }
 
     // TODO: Complete indexing
