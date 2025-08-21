@@ -65,6 +65,13 @@ public:
     }
 
     // TODO: Complete push_back method
+    // if size < capacity: write the new value at index size, then increment size.
+    // Else, if current capacity is 0 → make it 1, otherwise double it
+    // allocate a new buffer with that capacity.
+    // copy existing size elements from old buffer to new buffer.
+    // release the old buffer.
+    // update pointer and capacity to the new buffer.
+    // place the new value at index size, increment size.
     void push_back(T elem)
     {
     }
