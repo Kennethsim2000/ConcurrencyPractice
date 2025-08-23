@@ -76,9 +76,13 @@ public:
     {
     }
 
-    // TODO: print vector
     void print_vector()
     {
+        for (size_t i = 0; i < len_; i++)
+        {
+            std::cout << data_[i] << " ";
+        }
+        std::cout << std::endl;
     }
 
     size_t size()
