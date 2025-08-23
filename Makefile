@@ -5,8 +5,8 @@ CXXFLAGS = -Wall -Wextra -std=c++20 -pthread
 #-pthread is used to enable multi-threading support
 
 # Source files and their corresponding targets
-SRC = orderBook.cpp produceConsume.cpp readWrite.cpp concurrentHashmap.cpp 
-TARGETS = orderBook produceConsume readWrite concurrentHashmap #Corresponding executable
+SRC = orderBook.cpp produceConsume.cpp readWrite.cpp concurrentHashmap.cpp vector.cpp
+TARGETS = orderBook produceConsume readWrite concurrentHashmap vector #Corresponding executable
 
 # Default rule when you run make: Build all programs
 all: $(TARGETS)
@@ -28,6 +28,10 @@ concurrentHashmap: concurrentHashmap.cpp
 	$(CXX) $(CXXFLAGS) -o concurrentHashmap concurrentHashmap.cpp
 	chmod +x concurrentHashmap
 
+vector: vector.cpp
+	$(CXX) $(CXXFLAGS) -o vector vector.cpp
+	chmod +x vector
+
 # make clean: Deletes all the compiled binaries
 clean:
 	rm -f $(TARGETS)
@@ -39,6 +43,7 @@ check: all
 	./produceConsume
 	./readWrite
 	./concurrentHashmap
+	./vector
 
 # make distcheck: Distribution check, runs check, then echo
 distcheck: check
