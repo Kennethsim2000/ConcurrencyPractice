@@ -64,7 +64,6 @@ public:
         }
     }
 
-    // TODO: Complete push_back method
     // if size < capacity: write the new value at index size, then increment size.
     // Else, if current capacity is 0 → make it 1, otherwise double it
     // allocate a new buffer with that capacity.
@@ -105,6 +104,15 @@ public:
 
 int main()
 {
+    vector<int> customVector;
+    customVector.push_back(3);
+    customVector.push_back(5);
+    customVector.push_back(7);
+    customVector.push_back(9);
+    customVector.push_back(9);
+    customVector.print_vector();
+    std::cout << "capacity is " << customVector.capacity() << std::endl;
+    std::cout << "size is " << customVector.size() << std::endl;
     return 0;
 }
 // size(), capacity(), operator[] (unchecked), push_back, pop_back.
