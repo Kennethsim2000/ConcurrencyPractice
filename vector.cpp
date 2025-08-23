@@ -40,14 +40,14 @@ public:
 
     void resize(size_t capacity)
     {
-        void *raw = ::operator new(sizeof(T) * capacity);
+        void *raw = ::operator new(sizeof(T) * capacity); // allocate capacity * sizeof(T) bytes
         T *new_data = static_cast<T *>(raw);
         for (size_t i = 0; i < len_; i++)
         {
-            new (new_data + i) T std::move(data_[i]); // because we are working with raw memory, you need to construct objects explicitly with in new_allocated
-            data_[i].~T();
+            new (new_data + i) T(std::move(data_[i])); // because we are working with raw memory, you need to construct objects explicitly with in new_allocated
+            data_[i].~T();                             // call the destructor of the previous objects
         }
-        ::operator delete(data_);
+        ::operator delete(data_); // free up memory
         data_ = new_data;
         capacity_ = capacity;
     }
@@ -74,6 +74,13 @@ public:
     // place the new value at index size, increment size.
     void push_back(T elem)
     {
+        if (len_ == capacity_)
+        { // we need to resize
+            size_t newCapacity = capacity_ == 0 ? 1 : capacity_ * 2;
+            resize(newCapacity);
+        }
+        new (data_ + len_) T(std::move(elem));
+        len_++;
     }
 
     void print_vector()
