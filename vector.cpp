@@ -19,7 +19,7 @@ public:
     {
         capacity_ = capacity;
         len_ = 0;
-        data_ = ::operator new(sizeof(T) * capacity); //  this does not call constructor of T yet, it just gives u a raw memory block.
+        data_ = new T(sizeof(T) * capacity); //  this does not call constructor of T yet, it just gives u a raw memory block.
         // data_ = new T[capacity];
         // This implementation constructs capacity objects right away
     }
@@ -35,7 +35,7 @@ public:
             data_[i].~T();
         }
 
-        ::operator delete(data_); // frees raw memory previously allocated by ::operator new, does not call destructor
+        delete (data_); // frees raw memory previously allocated by ::operator new, does not call destructor
     }
 
     void resize(size_t capacity)
@@ -116,3 +116,5 @@ int main()
     return 0;
 }
 // size(), capacity(), operator[] (unchecked), push_back, pop_back.
+
+// g++ vector.cpp -o output && ./output && rm output
