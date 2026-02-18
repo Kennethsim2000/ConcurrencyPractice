@@ -48,6 +48,43 @@ public:
         capacity_ = other.capacity_;
     }
 
+    vector &operator=(const vector<T> &other)
+    {
+        if (this != &other) // compare memory address first to see if it is the same object
+        {
+            // allocate new buffer first, if fail, throw exception
+            T *newData_ = static_cast<T *>(::operator new(sizeof(T) * other.capacity_));
+            size_t constructed = 0;
+            try
+            {
+                for (; constructed < other.len_; constructed++)
+                {
+                    new (newData_ + constructed) T(other.data_[constructed]);
+                }
+            }
+            catch (...)
+            {
+                for (size_t i = 0; i < constructed; i++)
+                {
+                    newData_[i].~T();
+                }
+                ::operator delete(newData_);
+                throw;
+            }
+
+            // deallocate old buffer
+            for (size_t i = 0; i < len_; i++)
+            {
+                data_[i].~T();
+            }
+            ::operator delete(data_);
+            data_ = newData_;
+            len_ = other.len_;
+            capacity_ = other.capacity_;
+        }
+        return *this;
+    }
+
     ~vector()
     {
         // delete[] data_;
@@ -135,6 +172,10 @@ int main()
     customVector.push_back(9);
     customVector.push_back(9);
     vector<int> copyVector = customVector;
+    vector<int> copyAssVector;
+    copyAssVector.push_back(1);
+    copyAssVector = customVector;
+    copyAssVector.print_vector();
     copyVector.print_vector();
     customVector.print_vector();
     std::cout << "capacity is " << customVector.capacity() << std::endl;
