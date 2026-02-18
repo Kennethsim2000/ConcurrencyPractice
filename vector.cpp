@@ -96,6 +96,26 @@ public:
         other.capacity_ = 0;
     }
 
+    // move assignment
+    vector &operator=(vector &&other) noexcept
+    {
+        if (this == &other)
+            return *this;
+        for (size_t i = 0; i < len_; i++)
+        {
+            data_[i].~T();
+        }
+        ::operator delete(data_);
+        data_ = other.data_;
+        capacity_ = other.capacity_;
+        len_ = other.len_;
+        other.data_ = nullptr;
+        other.len_ = 0;
+        other.capacity_ = 0;
+
+        return *this;
+    }
+
     ~vector()
     {
         // delete[] data_;
@@ -190,12 +210,16 @@ int main()
     copyVector.print_vector();
     customVector.print_vector();
     vector<int> movedVec = std::move(customVector);
-    std::cout << "After moving" << std::endl;
+    std::cout << "After move constructor" << std::endl;
     movedVec.print_vector();
     std::cout << "Undefined vector" << std::endl;
     customVector.print_vector();
-    std::cout << "capacity is " << customVector.capacity() << std::endl;
-    std::cout << "size is " << customVector.size() << std::endl;
+    vector<int> newMoveVec;
+    newMoveVec = std::move(movedVec);
+    std::cout << "After move assignment" << std::endl;
+    copyAssVector.print_vector();
+    std::cout << "Undefined vector" << std::endl;
+    movedVec.print_vector();
     return 0;
 }
 // size(), capacity(), operator[] (unchecked), push_back, pop_back.
