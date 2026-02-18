@@ -85,6 +85,17 @@ public:
         return *this;
     }
 
+    // move constructor
+    vector(vector &&other) noexcept
+    {
+        data_ = other.data_;
+        capacity_ = other.capacity_;
+        len_ = other.len_;
+        other.data_ = nullptr;
+        other.len_ = 0;
+        other.capacity_ = 0;
+    }
+
     ~vector()
     {
         // delete[] data_;
@@ -177,6 +188,11 @@ int main()
     copyAssVector = customVector;
     copyAssVector.print_vector();
     copyVector.print_vector();
+    customVector.print_vector();
+    vector<int> movedVec = std::move(customVector);
+    std::cout << "After moving" << std::endl;
+    movedVec.print_vector();
+    std::cout << "Undefined vector" << std::endl;
     customVector.print_vector();
     std::cout << "capacity is " << customVector.capacity() << std::endl;
     std::cout << "size is " << customVector.size() << std::endl;
