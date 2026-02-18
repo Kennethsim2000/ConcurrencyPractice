@@ -19,9 +19,33 @@ public:
     {
         capacity_ = capacity;
         len_ = 0;
-        data_ = new T(sizeof(T) * capacity); //  this does not call constructor of T yet, it just gives u a raw memory block.
+        data_ = ::operator new(sizeof(T) * capacity); //  this does not call constructor of T yet, it just gives u a raw memory block.
         // data_ = new T[capacity];
         // This implementation constructs capacity objects right away
+    }
+
+    vector(const vector<T> &other) // we need to allocate a buffer, do a deep copy
+    {                              // copy constructor
+        data_ = static_cast<T *>(::operator new(sizeof(T) * other.capacity_));
+        try
+        {
+            for (size_t i = 0; i < other.len_; i++)
+            {
+                new (data_ + i) T(other.data_[i]); // calls the copy constructor of T
+                                                   // data_ + i: Specifies the memory address where the new object will be constructed
+            }
+        }
+        catch (...)
+        {
+            for (size_t i = 0; i < other.len_; i++)
+            {
+                data_[i].~T();
+            }
+            ::operator delete(data_);
+            throw;
+        }
+        len_ = other.len_;
+        capacity_ = other.capacity_;
     }
 
     ~vector()
@@ -35,7 +59,7 @@ public:
             data_[i].~T();
         }
 
-        delete (data_); // frees raw memory previously allocated by ::operator new, does not call destructor
+        ::operator delete(data_); // frees raw memory previously allocated by ::operator new, does not call destructor
     }
 
     void resize(size_t capacity)
@@ -110,6 +134,8 @@ int main()
     customVector.push_back(7);
     customVector.push_back(9);
     customVector.push_back(9);
+    vector<int> copyVector = customVector;
+    copyVector.print_vector();
     customVector.print_vector();
     std::cout << "capacity is " << customVector.capacity() << std::endl;
     std::cout << "size is " << customVector.size() << std::endl;
