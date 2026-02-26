@@ -32,6 +32,8 @@ public:
 
     T &operator*()
     {
+        if (!isPresent)
+            throw std::runtime_error("Optional is empty");
         return *pointer;
     }
 
@@ -76,6 +78,26 @@ public:
     }
 
     // move constructor
+    // since it is not dynamically allocated memory, we will have to move that object over to our current buffer
+    Optional<T>(Optional<T> &&other) noexcept
+    {
+        if (other.isPresent)
+        {
+            new (buffer) T(std::move(*other.pointer));
+            pointer = reinterpret_cast<T *>(buffer);
+            isPresent = true;
+
+            // Destroy moved-from object inside other
+            other.pointer->~T();
+            other.pointer = nullptr;
+            other.isPresent = false;
+        }
+        else
+        {
+            pointer = nullptr;
+            isPresent = false;
+        }
+    }
 
     // move assignment
 
@@ -98,6 +120,9 @@ int main()
     Optional<int> hasObj3(2);
     copyOpt = hasObj3;
     std::cout << "elem is " << *copyOpt << std::endl;
+    Optional<std::string> moveObj = std::move(hasObj2);
+    std::cout << "elem is " << *moveObj << std::endl;
+    std::cout << "elem is " << *hasObj2 << std::endl;
 }
 
 // g++ -std=c++20 -fsanitize=address -fno-omit-frame-pointer optional.cpp -o output && ./output && rm output
