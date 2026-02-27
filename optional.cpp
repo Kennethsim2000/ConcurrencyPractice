@@ -59,16 +59,20 @@ public:
         {
             if (isPresent && other.isPresent)
             {
-                *pointer = *other.pointer; // directly set the value in other.pointer to pointer(copy constructor)
+                *pointer = *other.pointer; // directly set the value in other.pointer to pointer(copy assignment)
+                // calling the copy assignment of T, so we do not need to destruct the current element
+                // Since pointer already points to the buffer, we can just construct the element directly
             }
             else if (!isPresent && other.isPresent)
             {
+                // place the new elem in the buffer
+                // get the pointer to point to our buffer
                 new (buffer) T(*other.pointer);
                 pointer = reinterpret_cast<T *>(buffer);
             }
             else if (isPresent && !other.isPresent)
             {
-                pointer->~T();
+                pointer->~T(); // destruct our current element(since our element belongs to our Optional)
                 pointer = nullptr;
             }
             isPresent = other.isPresent;
@@ -83,27 +87,47 @@ public:
     {
         if (other.isPresent)
         {
-            new (buffer) T(std::move(*other.pointer));
-            pointer = reinterpret_cast<T *>(buffer);
+            new (buffer) T(std::move(*other.pointer)); // call move to our new buffer
+            pointer = reinterpret_cast<T *>(buffer);   // assign our new pointer
             isPresent = true;
 
-            // Destroy moved-from object inside other
-            other.pointer->~T();
-            other.pointer = nullptr;
-            other.isPresent = false;
+            // make sure that we do not call the destructor of the other Optional as it is still a live object
+            // and its destructor will run later when it goes out of scope. Calling its destructor will lead to
+            // double freeing.
         }
-        else
-        {
-            pointer = nullptr;
-            isPresent = false;
-        }
+        other.pointer = nullptr;
+        other.isPresent = false;
     }
 
     // move assignment
+    Optional<T> &operator=(Optional<T> &&other)
+    {
+        if (this != &other)
+        {
+            // free up internal
+            if (isPresent && other.isPresent)
+            {
+                *pointer = std::move(other->pointer);
+            }
+            else if (!isPresent && other.isPresent)
+            {
+                new (buffer) T(std::move(*other.pointer));
+                pointer = reinterpret_cast<T *>(buffer);
+                isPresent = true;
+            }
+            else if (isPresent && !other.isPresent)
+            {
+                pointer->~T(); // destruct the current object
+                isPresent = false;
+            }
+            other.pointer = nullptr;
+            other.isPresent = false;
+        }
+        return *this;
+    }
 
 private:
     // allocate a char array in stack
-    // The way the memory is
     alignas(T) char buffer[sizeof(T)];
     T *pointer;
     bool isPresent;
