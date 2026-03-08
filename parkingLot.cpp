@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 enum class VehicleType
 {
@@ -116,10 +117,6 @@ public:
 
     const std::shared_ptr<Vehicle> &getVehicleParked() const
     {
-        if (!isOccupied_)
-        {
-            return nullptr;
-        }
         return vehicle_;
     }
 
@@ -128,6 +125,30 @@ private:
     Size size_;
     bool isOccupied_;
     std::shared_ptr<Vehicle> vehicle_; // use a shared_ptr because the
+};
+
+class ParkingLot
+{
+public:
+    ParkingLot(std::vector<Spot> spots) : spots_(std::move(spots)) {}
+
+    bool parkVehicle(const std::shared_ptr<Vehicle> &ptr)
+    {
+        // TODO: implement
+    }
+
+    void exitVehicle(const std::shared_ptr<Vehicle> &ptr)
+    {
+        // TODO : implement
+    }
+
+    std::vector<Spot> availableSpots(Size size)
+    {
+        // TODO: implement
+    }
+
+private:
+    std::vector<Spot> spots_;
 };
 
 int main()
