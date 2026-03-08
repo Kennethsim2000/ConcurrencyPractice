@@ -49,7 +49,7 @@ private:
 class Car : public Vehicle
 {
 public:
-    Car(std::string licensePlate) : Vehicle(VehicleType::Car, licensePlate, Size::Medium) {};
+    Car(std::string licensePlate) : Vehicle(VehicleType::Car, std::move(licensePlate), Size::Medium) {};
     ~Car()
     {
         std::cout << "Destructing a car" << std::endl;
@@ -59,7 +59,7 @@ public:
 class Motorcycle : public Vehicle
 {
 public:
-    Motorcycle(std::string licensePlate) : Vehicle(VehicleType::Motorcycle, licensePlate, Size::Small) {};
+    Motorcycle(std::string licensePlate) : Vehicle(VehicleType::Motorcycle, std::move(licensePlate), Size::Small) {};
     ~Motorcycle()
     {
         std::cout << "Destructing a motorcycle" << std::endl;
@@ -69,11 +69,25 @@ public:
 class Truck : public Vehicle
 {
 public:
-    Truck(std::string licensePlate) : Vehicle(VehicleType::Truck, licensePlate, Size::Large) {};
+    Truck(std::string licensePlate) : Vehicle(VehicleType::Truck, std::move(licensePlate), Size::Large) {};
     ~Truck()
     {
         std::cout << "Destructing a truck" << std::endl;
     }
+};
+
+class Spot
+{
+public:
+    Spot() {
+
+    };
+
+private:
+    uint64_t spotId_;
+    Size size_;
+    bool isOccupied_;
+    std::string licensePlate_;
 };
 
 int main()
