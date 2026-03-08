@@ -8,7 +8,7 @@ enum class VehicleType
     Truck
 };
 
-enum Size
+enum class Size
 {
     Small,
     Medium,
@@ -18,7 +18,7 @@ enum Size
 class Vehicle
 {
 public:
-    Vehicle(VehicleType type, std::string licensePlate, Size size) : type_(type), licensePlate_(licensePlate), size_(size) {};
+    Vehicle(VehicleType type, std::string licensePlate, Size size) : type_(type), licensePlate_(std::move(licensePlate)), size_(size) {};
     // virtual constructors are not allowed in C++.
     // A virtual function call requires an existing object with a virtual pointer (vptr) that points to a virtual table (vtable) to determine the correct function to
     // call at runtime (dynamic dispatch). During the execution of a constructor, the object is still in the process of being created, and its vtable is not yet fully
@@ -79,9 +79,23 @@ public:
 class Spot
 {
 public:
-    Spot() {
+    Spot(uint64_t spotId, Size size) : spotId_(spotId), size_(size), isOccupied_(false) {};
 
+    bool reserveSpot(const Vehicle &vec)
+    {
+        if (canReserve(vec) && !isOccupied_)
+        {
+            isOccupied_ = true;
+            licensePlate_ = vec.getLicensePlate();
+            return true;
+        }
+        return false;
     };
+
+    bool canReserve(const Vehicle &vec) const
+    {
+        return size_ >= vec.getSize();
+    }
 
 private:
     uint64_t spotId_;
