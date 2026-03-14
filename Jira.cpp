@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <chrono>
 
 enum class Priority
 {
@@ -23,6 +24,7 @@ struct Ticket
     std::string description_;
     Priority priority_;
     std::weak_ptr<User> assigned_to;
+    std::chrono::system_clock::time_point deadline_;
 };
 
 class WorkSpace // does not destructor due to RAII for std::vector
