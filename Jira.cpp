@@ -22,10 +22,18 @@ public:
         return userId_;
     }
 
+    friend std::ostream &operator<<(std::ostream &stream, const User &user);
+
 private:
     std::uint32_t userId_;
     std::string name_;
 };
+
+std::ostream &operator<<(std::ostream &stream, const User &user)
+{
+    stream << "user id is " << user.userId_ << " and name is " << user.name_;
+    return stream;
+}
 
 struct Ticket
 {
@@ -87,6 +95,15 @@ private:
 int main()
 {
     User user1(1, "Kenneth Sim");
+    User user2(2, "Thomas edison");
+    WorkSpace workspace;
+    workspace.addUser(user1);
+    workspace.addUser(user2);
+    std::vector<User> users = workspace.getUsers();
+    for (const auto user : users)
+    {
+        std::cout << user << std::endl;
+    }
 }
 
 /*
