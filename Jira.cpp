@@ -14,8 +14,17 @@ enum class Priority
 
 class User // a user can belong to multiple workspaces
 {
-    std::uint32_t userId;
-    std::string name;
+public:
+    User(std::uint32_t userId, std::string name) : userId_(userId), name_(name) {}
+
+    std::uint32_t getUserId()
+    {
+        return userId_;
+    }
+
+private:
+    std::uint32_t userId_;
+    std::string name_;
 };
 
 struct Ticket
@@ -36,6 +45,12 @@ public:
 
     void addUser(User &user)
     {
+        auto it = userIdToTicketsMap_.find(user.getUserId());
+        if (it == userIdToTicketsMap_.end())
+        {
+            users_.push_back(user);
+            userIdToTicketsMap_[user.getUserId()] = std::vector<uint32_t>();
+        }
     }
 
     void addTicket(Ticket &ticket)
@@ -46,8 +61,9 @@ public:
     {
     }
 
-    std::vector<User> getUsers()
+    std::vector<User> getUsers() const
     {
+        return users_;
     }
 
     std::vector<Ticket> getTickets(Priority priority)
@@ -70,6 +86,7 @@ private:
 
 int main()
 {
+    User user1(1, "Kenneth Sim");
 }
 
 /*
