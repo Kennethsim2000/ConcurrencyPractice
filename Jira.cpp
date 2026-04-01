@@ -17,7 +17,7 @@ class User // a user can belong to multiple workspaces
 public:
     User(std::uint32_t userId, std::string name) : userId_(userId), name_(name) {}
 
-    std::uint32_t getUserId()
+    std::uint32_t getUserId() const
     {
         return userId_;
     }
@@ -51,13 +51,21 @@ public:
     {
     }
 
-    void addUser(User &user)
+    void addUser(const User &user)
     {
         auto it = userIdToTicketsMap_.find(user.getUserId());
         if (it == userIdToTicketsMap_.end())
         {
             users_.push_back(user);
             userIdToTicketsMap_[user.getUserId()] = std::vector<uint32_t>();
+        }
+    }
+
+    void addUsers(std::vector<User> &users)
+    {
+        for (const auto &user : users)
+        {
+            addUser(user);
         }
     }
 
