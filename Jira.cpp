@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <chrono>
+#include <unordered_map>
 
 enum class Priority
 {
@@ -12,10 +13,13 @@ enum class Priority
     High
 };
 
+using UserId = std::uint32_t;
+using TicketId = std::uint32_t;
+
 class User // a user can belong to multiple workspaces
 {
 public:
-    User(std::uint32_t userId, std::string name) : userId_(userId), name_(name) {}
+    User(std::uint32_t userId, std::string name) : userId_(userId), name_(std::move(name)) {}
 
     std::uint32_t getUserId() const
     {
@@ -25,7 +29,7 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const User &user);
 
 private:
-    std::uint32_t userId_;
+    UserId userId_;
     std::string name_;
 };
 
@@ -37,7 +41,7 @@ std::ostream &operator<<(std::ostream &stream, const User &user)
 
 struct Ticket
 {
-    std::uint32_t ticketId;
+    TicketId ticketId_;
     std::string description_;
     Priority priority_;
     std::weak_ptr<User> assigned_to;
@@ -47,21 +51,18 @@ struct Ticket
 class WorkSpace // does not destructor due to RAII for std::vector
 {
 public:
-    WorkSpace()
-    {
-    }
+    WorkSpace() = default;
 
     void addUser(const User &user)
     {
-        auto it = userIdToTicketsMap_.find(user.getUserId());
-        if (it == userIdToTicketsMap_.end())
+        auto [it, inserted] = userIdToTicketsMap_.emplace(user.getUserId(), std::vector<uint32_t>{});
+        if (inserted)
         {
-            users_.push_back(user);
-            userIdToTicketsMap_[user.getUserId()] = std::vector<uint32_t>();
+            users_.emplace_back(user);
         }
     }
 
-    void addUsers(std::vector<User> &users)
+    void addUsers(const std::vector<User> &users)
     {
         for (const auto &user : users)
         {
@@ -69,7 +70,7 @@ public:
         }
     }
 
-    void addTicket(Ticket &ticket)
+    void addTicket(const Ticket &ticket)
     {
     }
 
@@ -77,7 +78,7 @@ public:
     {
     }
 
-    std::vector<User> getUsers() const
+    const std::vector<User> &getUsers() const
     {
         return users_;
     }
@@ -108,7 +109,7 @@ int main()
     workspace.addUser(user1);
     workspace.addUser(user2);
     std::vector<User> users = workspace.getUsers();
-    for (const auto user : users)
+    for (const auto &user : users)
     {
         std::cout << user << std::endl;
     }
