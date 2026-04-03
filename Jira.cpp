@@ -44,7 +44,6 @@ struct Ticket
     TicketId ticketId_;
     std::string description_;
     Priority priority_;
-    std::weak_ptr<User> assigned_to;
     std::chrono::system_clock::time_point deadline_;
 };
 
@@ -72,6 +71,7 @@ public:
 
     void addTicket(const Ticket &ticket)
     {
+        tickets_.emplace_back(ticket);
     }
 
     void assignTicket(std::uint32_t userId, std::uint32_t ticketId)
@@ -103,12 +103,23 @@ private:
 
 int main()
 {
-    User user1(1, "Kenneth Sim");
-    User user2(2, "Thomas edison");
+    UserId nextUserId = 1;
+    TicketId nextTicketId = 1;
+    User user1(nextUserId, "Kenneth Sim");
+    nextUserId++;
+    User user2(nextUserId, "Thomas edison");
+    nextUserId++;
+
     WorkSpace workspace;
     workspace.addUser(user1);
     workspace.addUser(user2);
+
     std::vector<User> users = workspace.getUsers();
+    auto now = std::chrono::system_clock::now();
+    auto deadline = now + std::chrono::hours(24 * 3);
+    Ticket tic1(nextTicketId, "Refactor code", Priority::Medium, deadline);
+    nextTicketId++;
+    workspace.addTicket(tic1);
     for (const auto &user : users)
     {
         std::cout << user << std::endl;
