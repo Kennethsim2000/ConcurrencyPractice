@@ -8,13 +8,15 @@ template <typename T, size_t N>
 class ObjectPool
 {
 private:
-    struct Node
+    struct Slot
     {
-        Node *next;
+        alignas(T) std::byte data[sizeof(T)];
+        Slot *next;
     };
 
-    alignas(T) char storage[N * sizeof(T)];
-    Node *freeList;
+    alignas(Slot) std::byte buffer[N * sizeof(Slot)];
+    // each slot is aligned properly, no unsafe reintepret_cast into misaligned memory
+    Slot *freeList;
 
 public:
     ObjectPool()
@@ -22,9 +24,9 @@ public:
         freeList = nullptr;
         for (size_t i = 0; i < N; i++)
         {
-            auto node = reinterpret_cast<Node *>(storage + i * sizeof(T));
-            node->next = freeList;
-            freeList = node;
+            Slot *slot = reinterpret_cast<Slot *>(buffer + i * sizeof(Slot));
+            slot->next = freeList;
+            freeList = slot;
         }
     }
 
@@ -34,18 +36,19 @@ public:
         if (!freeList)
             throw std::bad_alloc();
 
-        Node *node = freeList;
+        Slot *slot = freeList;
         freeList = freeList->next;
 
-        return new (node) T(std::forward<Args>(args)...);
+        T *obj = reinterpret_cast<T *>(slot->data);
+        return new (obj) T(std::forward<Args>(args)...);
     }
 
     void destroy(T *obj)
     {
         obj->~T();
-        Node *node = reinterpret_cast<Node *>(obj);
-        node->next = freeList;
-        freeList = node;
+        Slot *slot = reinterpret_cast<Slot *>(reinterpret_cast<std::byte *>(obj));
+        slot->next = freeList;
+        freeList = slot;
     }
 };
 
