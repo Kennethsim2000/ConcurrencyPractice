@@ -223,5 +223,6 @@ int main()
     return 0;
 }
 // size(), capacity(), operator[] (unchecked), push_back, pop_back.
+// copy constructor, assignment, move constructor, move ass
 
 // g++ vector.cpp -o output && ./output && rm output
