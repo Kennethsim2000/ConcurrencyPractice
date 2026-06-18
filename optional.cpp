@@ -2,11 +2,35 @@
 #include <iostream>
 #include <cstring>
 
+struct Tracker
+{
+    static int ctorCount;
+    static int dtorCount;
+
+    Tracker()
+    {
+        ++ctorCount;
+    }
+
+    Tracker(Tracker &&)
+    {
+        ++ctorCount;
+    }
+
+    ~Tracker()
+    {
+        ++dtorCount;
+    }
+};
+
+int Tracker::ctorCount = 0;
+int Tracker::dtorCount = 0;
+
 template <typename T>
 class Optional
 {
 public:
-    Optional(T elem)
+    Optional(const T &elem)
     {
         // placement new
         new (buffer) T(elem);
@@ -19,6 +43,13 @@ public:
     {
         isPresent = false;
         pointer = nullptr;
+    }
+
+    Optional(T &&value)
+    {
+        new (buffer) T(std::move(value));
+        isPresent = true;
+        pointer = reinterpret_cast<T *>(buffer);
     }
 
     // destructor does not need to free stack memory. Destructor is in charge of running cleanup logic, release any resources the object owns(heap memory, file handles)
@@ -90,6 +121,7 @@ public:
             new (buffer) T(std::move(*other.pointer)); // call move to our new buffer
             pointer = reinterpret_cast<T *>(buffer);   // assign our new pointer
             isPresent = true;
+            // other.pointer->~T();
 
             // make sure that we do not call the destructor of the other Optional as it is still a live object
             // and its destructor will run later when it goes out of scope. Calling its destructor will lead to
@@ -107,7 +139,7 @@ public:
             // free up internal
             if (isPresent && other.isPresent)
             {
-                *pointer = std::move(other->pointer);
+                *pointer = std::move(*other.pointer);
             }
             else if (!isPresent && other.isPresent)
             {
@@ -124,6 +156,11 @@ public:
             other.isPresent = false;
         }
         return *this;
+    }
+
+    bool has_value() const noexcept
+    {
+        return isPresent;
     }
 
 private:
@@ -146,15 +183,27 @@ int main()
     std::cout << "elem is " << *copyOpt << std::endl;
     Optional<std::string> moveObj = std::move(hasObj2);
     std::cout << "elem is " << *moveObj << std::endl;
-    std::cout << "elem is " << *hasObj2 << std::endl;
+    // std::cout << "elem is " << *hasObj2 << std::endl;
+
+    {
+        Optional<Tracker> a(Tracker{});
+        Optional<Tracker> b(std::move(a));
+    }
+
+    std::cout
+        << "ctors = " << Tracker::ctorCount
+        << "\n"
+        << "dtors = " << Tracker::dtorCount
+        << "\n";
 }
 
-// g++ -std=c++20 -fsanitize=address -fno-omit-frame-pointer optional.cpp -o output && ./output && rm output
+// g++ -std=c++20 -g -fsanitize=address -fno-omit-frame-pointer optional.cpp -o output && ./output && rm output
 
 // EXTRA FIELDS TO ADD IN Optional
 // Optional(const T& value) //(already present, but assign a reference)
 // Optional(T&& value) // construct from rvalue
 //  Bool has_value const noexcept;
+
 // Explit operator bool() const noexcept;
 // T& value();
 // Const t& value() const;
