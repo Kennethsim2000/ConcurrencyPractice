@@ -1,6 +1,8 @@
 #include <atomic>
 #include <array>
 #include <cstddef>
+#include <thread>
+#include <iostream>
 
 template <typename T, size_t Capacity>
 class SPSCQueue
@@ -8,8 +10,8 @@ class SPSCQueue
     static_assert((Capacity & (Capacity - 1)) == 0, "Capacity must be power of 2");
 
 private:
-    alignas(64) std::atomic head_{0};
-    alignas(64) std::atomic tail_{0};
+    alignas(64) std::atomic<int> head_{0};
+    alignas(64) std::atomic<int> tail_{0};
     std::array<T, Capacity> buffer_;
 
     static constexpr size_t MASK = Capacity - 1;
@@ -37,7 +39,7 @@ public:
         {
             return false; // empty
         }
-        item = std::move(buffer[head & MASK]);
+        item = std::move(buffer_[head & MASK]);
         head_.store(head + 1, std::memory_order_release);
         return true;
     }
@@ -52,3 +54,24 @@ public:
         return size() == 0;
     }
 };
+
+int main()
+{
+    SPSCQueue<int, 1024> queue;
+    std::thread producer([&]()
+                         {
+        for(int i = 0; i < 100000; ++i) {
+            while(!queue.push(i)){} // spin
+        } });
+    std::thread consumer([&]()
+                         {
+        int value;
+        for(int i = 0; i < 10000; ++i) {
+            while(!queue.pop(value)) {} // spin
+            std::cout << value << '\n';
+        } });
+    producer.join();
+    consumer.join();
+}
+
+// g++ -std=c++20 -fsanitize=address -fno-omit-frame-pointer spsc.cpp -o output && ./output && rm output

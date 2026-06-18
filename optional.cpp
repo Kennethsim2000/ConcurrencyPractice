@@ -150,3 +150,15 @@ int main()
 }
 
 // g++ -std=c++20 -fsanitize=address -fno-omit-frame-pointer optional.cpp -o output && ./output && rm output
+
+// EXTRA FIELDS TO ADD IN Optional
+// Optional(const T& value) //(already present, but assign a reference)
+// Optional(T&& value) // construct from rvalue
+//  Bool has_value const noexcept;
+// Explit operator bool() const noexcept;
+// T& value();
+// Const t& value() const;
+// Const t& operator*() const; // non const version exists
+// T* operator->();
+// Const T* operator->() const;
+// Void reset() noexcept;
