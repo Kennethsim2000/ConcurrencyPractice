@@ -58,10 +58,55 @@ public:
         if (isPresent)
         { // call the destructor of the object we own
             pointer->~T();
+            poitner = nullptr;
+            isPresent = false;
         }
     }
 
+    void reset() noexcept
+    {
+        if (isPresent)
+        { // call the destructor of the object we own
+            pointer->~T();
+        }
+    }
+
+    T *operator->()
+    {
+        if (!isPresent)
+            throw std::runtime_error("Optional is empty");
+        return pointer;
+    }
+
+    const T *operator->() const
+    {
+        if (!isPresent)
+            throw std::runtime_error("Optional is empty");
+        return pointer;
+    }
+
     T &operator*()
+    {
+        if (!isPresent)
+            throw std::runtime_error("Optional is empty");
+        return *pointer;
+    }
+
+    const T &operator*() const
+    {
+        if (!isPresent)
+            throw std::runtime_error("Optional is empty");
+        return *pointer;
+    }
+
+    T &value()
+    {
+        if (!isPresent)
+            throw std::runtime_error("Optional is empty");
+        return *pointer;
+    }
+
+    const T &value() const
     {
         if (!isPresent)
             throw std::runtime_error("Optional is empty");
@@ -127,8 +172,14 @@ public:
             // and its destructor will run later when it goes out of scope. Calling its destructor will lead to
             // double freeing.
         }
-        other.pointer = nullptr;
-        other.isPresent = false;
+        else
+        {
+            pointer = nullptr;
+            isPresent = false;
+        }
+        // other.pointer = nullptr;
+        // other.isPresent = false;
+        // we also do not want to set the other Optional.isPresent = false as this means that the destructor for the other object will not free.
     }
 
     // move assignment
@@ -151,9 +202,11 @@ public:
             {
                 pointer->~T(); // destruct the current object
                 isPresent = false;
+                pointer = nullptr;
             }
-            other.pointer = nullptr;
-            other.isPresent = false;
+            // DON'T MODIFY OTHER
+            // other.pointer = nullptr;
+            // other.isPresent = false;
         }
         return *this;
     }
@@ -200,14 +253,14 @@ int main()
 // g++ -std=c++20 -g -fsanitize=address -fno-omit-frame-pointer optional.cpp -o output && ./output && rm output
 
 // EXTRA FIELDS TO ADD IN Optional
-// Optional(const T& value) //(already present, but assign a reference)
-// Optional(T&& value) // construct from rvalue
 //  Bool has_value const noexcept;
 
 // Explit operator bool() const noexcept;
 // T& value();
 // Const t& value() const;
+
 // Const t& operator*() const; // non const version exists
+
 // T* operator->();
 // Const T* operator->() const;
 // Void reset() noexcept;
